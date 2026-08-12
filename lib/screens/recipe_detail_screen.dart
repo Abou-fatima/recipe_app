@@ -47,7 +47,7 @@ class RecipeDetailScreen extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withAlpha(179),
                         ],
                       ),
                     ),
@@ -60,10 +60,12 @@ class RecipeDetailScreen extends StatelessWidget {
                       builder: (context, provider, child) {
                         final isFavorite = provider.isFavorite(recipe.id);
                         return CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(0.9),
+                          backgroundColor: Colors.white.withAlpha(230),
                           child: IconButton(
                             icon: Icon(
-                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
                               color: isFavorite ? Colors.red : Colors.grey[700],
                               size: 24,
                             ),
@@ -85,7 +87,7 @@ class RecipeDetailScreen extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: Colors.black.withAlpha(179),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -136,14 +138,15 @@ class RecipeDetailScreen extends StatelessWidget {
                           children: [
                             Chip(
                               label: Text(recipe.category),
-                              backgroundColor: Colors.white.withOpacity(0.3),
+                              backgroundColor: Colors.white.withAlpha(77),
                               labelStyle: const TextStyle(color: Colors.white),
                               padding: EdgeInsets.zero,
                             ),
                             const SizedBox(width: 8),
                             Chip(
-                              label: Text('${recipe.prepTime + recipe.cookTime} min'),
-                              backgroundColor: Colors.white.withOpacity(0.3),
+                              label: Text(
+                                  '${recipe.prepTime + recipe.cookTime} min'),
+                              backgroundColor: Colors.white.withAlpha(77),
                               labelStyle: const TextStyle(color: Colors.white),
                               padding: EdgeInsets.zero,
                             ),
@@ -171,9 +174,10 @@ class RecipeDetailScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Description',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         Text(recipe.description),
@@ -192,9 +196,10 @@ class RecipeDetailScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Ingredients',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 12),
                         ...recipe.ingredients.map(
@@ -228,42 +233,44 @@ class RecipeDetailScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Instructions',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 12),
                         ...recipe.instructions.asMap().entries.map(
-                          (entry) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '${entry.key + 1}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
+                              (entry) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 28,
+                                      height: 28,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${entry.key + 1}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(entry.value),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(entry.value),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

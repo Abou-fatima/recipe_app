@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 
 class RecipeProvider extends ChangeNotifier {
-  List<Recipe> _recipes = SampleRecipes.recipes;
-  List<Recipe> _favorites = [];
+  final List<Recipe> _recipes = SampleRecipes.recipes;
+  final List<Recipe> _favorites = [];
   String _searchQuery = '';
   String _selectedCategory = 'All';
 
@@ -49,13 +49,13 @@ class RecipeProvider extends ChangeNotifier {
     if (index != -1) {
       final recipe = _recipes[index];
       _recipes[index] = recipe.copyWith(isFavorite: !recipe.isFavorite);
-      
+
       if (_recipes[index].isFavorite) {
         _favorites.add(_recipes[index]);
       } else {
         _favorites.removeWhere((fav) => fav.id == id);
       }
-      
+
       notifyListeners();
     }
   }
