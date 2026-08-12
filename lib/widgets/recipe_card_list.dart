@@ -15,7 +15,7 @@ class RecipeCardList extends StatelessWidget {
         onTap: () => context.push('/recipe/${recipe.id}'),
         child: Row(
           children: [
-            const SizedBox(
+            SizedBox(
               width: 120,
               height: 120,
               child: Image.network(
