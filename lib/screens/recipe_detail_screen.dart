@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:recipe_app/models/recipe_model.dart';
+import 'package:recipe_app/providers/recipe_provider.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final int recipeId;
@@ -8,17 +10,17 @@ class RecipeDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recipe = Recipe.sampleRecipes.firstWhere(
-      (r) => r.id == recipeId,
-      orElse: () => Recipe.sampleRecipes[0],
-    );
+    final recipe = context.read<RecipeProvider>().recipes.firstWhere(
+          (r) => r.id == recipeId,
+          orElse: () => SampleRecipes.recipes.first,
+        );
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           // App Bar with Image
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 350,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
@@ -45,15 +47,38 @@ class RecipeDetailScreen extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.6),
+                          Colors.black.withOpacity(0.7),
                         ],
                       ),
+                    ),
+                  ),
+                  // Favorite button
+                  Positioned(
+                    top: 60,
+                    right: 16,
+                    child: Consumer<RecipeProvider>(
+                      builder: (context, provider, child) {
+                        final isFavorite = provider.isFavorite(recipe.id);
+                        return CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.9),
+                          child: IconButton(
+                            icon: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? Colors.red : Colors.grey[700],
+                              size: 24,
+                            ),
+                            onPressed: () {
+                              provider.toggleFavorite(recipe.id);
+                            },
+                          ),
+                        );
+                      },
                     ),
                   ),
                   // Rating badge
                   Positioned(
                     top: 60,
-                    right: 16,
+                    right: 80,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -106,7 +131,7 @@ class RecipeDetailScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Row(
                           children: [
                             Chip(
@@ -177,9 +202,13 @@ class RecipeDetailScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Row(
                               children: [
-                                const Icon(Icons.check_circle, size: 16, color: Colors.green),
+                                const Icon(
+                                  Icons.check_circle,
+                                  size: 16,
+                                  color: Colors.green,
+                                ),
                                 const SizedBox(width: 8),
-                                Text(ingredient),
+                                Expanded(child: Text(ingredient)),
                               ],
                             ),
                           ),

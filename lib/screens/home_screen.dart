@@ -8,8 +8,15 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recipes = Recipe.sampleRecipes;
-    final categories = ['All', 'Italian', 'Indian', 'Japanese', 'Mexican', 'Thai'];
+    final recipes = SampleRecipes.recipes;
+    final categories = [
+      'All',
+      'Italian',
+      'Indian',
+      'Japanese',
+      'Mexican',
+      'Thai'
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -35,10 +42,11 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Welcome to Recipe App!',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
                     ),
                     const SizedBox(height: 8),
                     Text(

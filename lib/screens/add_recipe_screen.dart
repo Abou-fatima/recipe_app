@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:recipe_app/models/recipe_model.dart';
+import 'package:recipe_app/providers/recipe_provider.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   const AddRecipeScreen({super.key});
@@ -17,6 +20,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   final _cookTimeController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _instructionsController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -30,18 +34,54 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Recipe added successfully! 🎉'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      Future.delayed(const Duration(milliseconds: 500), () {
-        context.go('/');
-      });
+      setState(() => _isSubmitting = true);
+
+      try {
+        final recipe = Recipe(
+          id: DateTime.now().millisecondsSinceEpoch,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop',
+          category: _categoryController.text.trim(),
+          prepTime: int.parse(_prepTimeController.text),
+          cookTime: int.parse(_cookTimeController.text),
+          ingredients: _ingredientsController.text.split(',').map((e) => e.trim()).toList(),
+          instructions: _instructionsController.text.split('\n').where((e) => e.trim().isNotEmpty).toList(),
+          rating: 0.0,
+          reviews: 0,
+        );
+
+        context.read<RecipeProvider>().addRecipe(recipe);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Recipe added successfully! 🎉'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            context.go('/recipes');
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+        }
+      }
     }
   }
 
@@ -52,8 +92,14 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         title: const Text('Add New Recipe'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _submitForm,
+            icon: _isSubmitting
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save),
+            onPressed: _isSubmitting ? null : _submitForm,
           ),
         ],
       ),
@@ -63,13 +109,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Title
-              TextFormField(
+              _buildTextField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Recipe Title *',
-                  prefixIcon: Icon(Icons.title),
-                ),
+                label: 'Recipe Title',
+                icon: Icons.title,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a title';
@@ -81,14 +124,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Description
-              TextFormField(
+              _buildTextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description *',
-                  prefixIcon: Icon(Icons.description),
-                ),
+                label: 'Description',
+                icon: Icons.description,
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -101,15 +140,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Category
-              TextFormField(
+              _buildTextField(
                 controller: _categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Category *',
-                  prefixIcon: Icon(Icons.category),
-                  hintText: 'e.g., Italian, Indian, Japanese',
-                ),
+                label: 'Category',
+                icon: Icons.category,
+                hint: 'e.g., Italian, Indian, Japanese',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a category';
@@ -118,26 +153,23 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Prep Time & Cook Time
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
+                    child: _buildTextField(
                       controller: _prepTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Prep Time (min) *',
-                        prefixIcon: Icon(Icons.timer),
-                      ),
+                      label: 'Prep Time (min)',
+                      icon: Icons.timer,
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';
                         }
-                        if (int.tryParse(value) == null) {
+                        final number = int.tryParse(value);
+                        if (number == null) {
                           return 'Enter a valid number';
                         }
-                        if (int.parse(value) < 0) {
+                        if (number < 0) {
                           return 'Must be positive';
                         }
                         return null;
@@ -146,21 +178,20 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: TextFormField(
+                    child: _buildTextField(
                       controller: _cookTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Cook Time (min) *',
-                        prefixIcon: Icon(Icons.timer_off),
-                      ),
+                      label: 'Cook Time (min)',
+                      icon: Icons.timer_off,
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';
                         }
-                        if (int.tryParse(value) == null) {
+                        final number = int.tryParse(value);
+                        if (number == null) {
                           return 'Enter a valid number';
                         }
-                        if (int.parse(value) < 0) {
+                        if (number < 0) {
                           return 'Must be positive';
                         }
                         return null;
@@ -170,40 +201,37 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Ingredients
-              TextFormField(
+              _buildTextField(
                 controller: _ingredientsController,
-                decoration: const InputDecoration(
-                  labelText: 'Ingredients (comma separated) *',
-                  prefixIcon: Icon(Icons.list),
-                  hintText: 'e.g., Pasta, Eggs, Cheese',
-                ),
+                label: 'Ingredients',
+                icon: Icons.list,
+                hint: 'Separate with commas, e.g., Pasta, Eggs, Cheese',
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter at least one ingredient';
                   }
-                  if (value.split(',').length < 2) {
+                  final ingredients = value.split(',').where((e) => e.trim().isNotEmpty).toList();
+                  if (ingredients.length < 2) {
                     return 'Enter at least 2 ingredients';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-
-              // Instructions
-              TextFormField(
+              _buildTextField(
                 controller: _instructionsController,
-                decoration: const InputDecoration(
-                  labelText: 'Instructions (step by step) *',
-                  prefixIcon: Icon(Icons.format_list_numbered),
-                  hintText: 'e.g., Step 1: ..., Step 2: ...',
-                ),
-                maxLines: 5,
+                label: 'Instructions',
+                icon: Icons.format_list_numbered,
+                hint: 'Enter each step on a new line',
+                maxLines: 6,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter instructions';
+                  }
+                  final lines = value.split('\n').where((e) => e.trim().isNotEmpty).toList();
+                  if (lines.length < 2) {
+                    return 'Enter at least 2 steps';
                   }
                   if (value.length < 20) {
                     return 'Instructions must be at least 20 characters';
@@ -212,17 +240,21 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 },
               ),
               const SizedBox(height: 32),
-
-              // Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: _submitForm,
-                  icon: const Icon(Icons.save),
-                  label: const Text(
-                    'Add Recipe',
-                    style: TextStyle(fontSize: 18),
+                  onPressed: _isSubmitting ? null : _submitForm,
+                  icon: _isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(
+                    _isSubmitting ? 'Adding...' : 'Add Recipe',
+                    style: const TextStyle(fontSize: 18),
                   ),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -235,6 +267,31 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: '$label *',
+        prefixIcon: Icon(icon),
+        hintText: hint,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      validator: validator,
     );
   }
 }

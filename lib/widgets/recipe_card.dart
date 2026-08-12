@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:recipe_app/models/recipe_model.dart';
+import 'package:recipe_app/providers/recipe_provider.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -40,7 +42,7 @@ class RecipeCard extends StatelessWidget {
                   // Category badge
                   Positioned(
                     top: 8,
-                    right: 8,
+                    left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -58,6 +60,28 @@ class RecipeCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ),
+                  ),
+                  // Favorite button
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Consumer<RecipeProvider>(
+                      builder: (context, provider, child) {
+                        final isFavorite = provider.isFavorite(recipe.id);
+                        return IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.white,
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            provider.toggleFavorite(recipe.id);
+                          },
+                        );
+                      },
                     ),
                   ),
                   // Rating

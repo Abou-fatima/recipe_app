@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatelessWidget {
+  final String? initialValue;
   final Function(String) onSearch;
 
-  const CustomSearchBar({super.key, required this.onSearch});
+  const CustomSearchBar({
+    super.key,
+    this.initialValue,
+    required this.onSearch,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      initialValue: initialValue,
       decoration: InputDecoration(
         hintText: 'Search recipes...',
         prefixIcon: const Icon(Icons.search),

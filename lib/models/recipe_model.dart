@@ -10,6 +10,7 @@ class Recipe {
   final List<String> instructions;
   final double rating;
   final int reviews;
+  final bool isFavorite;
 
   Recipe({
     required this.id,
@@ -23,10 +24,55 @@ class Recipe {
     required this.instructions,
     required this.rating,
     required this.reviews,
+    this.isFavorite = false,
   });
 
-  // Sample data with online images (Unsplash)
-  static List<Recipe> sampleRecipes = [
+  Recipe copyWith({
+    int? id,
+    String? title,
+    String? description,
+    String? imageUrl,
+    String? category,
+    int? prepTime,
+    int? cookTime,
+    List<String>? ingredients,
+    List<String>? instructions,
+    double? rating,
+    int? reviews,
+    bool? isFavorite,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
+      prepTime: prepTime ?? this.prepTime,
+      cookTime: cookTime ?? this.cookTime,
+      ingredients: ingredients ?? this.ingredients,
+      instructions: instructions ?? this.instructions,
+      rating: rating ?? this.rating,
+      reviews: reviews ?? this.reviews,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
+}
+
+class RecipeCategory {
+  static const List<String> categories = [
+    'All',
+    'Italian',
+    'Indian',
+    'Japanese',
+    'Mexican',
+    'Thai',
+    'French',
+    'Chinese',
+  ];
+}
+
+class SampleRecipes {
+  static List<Recipe> get recipes => [
     Recipe(
       id: 1,
       title: 'Spaghetti Carbonara',
@@ -46,6 +92,7 @@ class Recipe {
       ],
       rating: 4.8,
       reviews: 1234,
+      isFavorite: true,
     ),
     Recipe(
       id: 2,
