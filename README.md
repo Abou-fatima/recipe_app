@@ -68,39 +68,74 @@ Si vous voulez, je peux: lancer `flutter analyze` et `flutter test`, ajouter des
 - [ ] Fichiers de configuration: `pubspec.yaml` mis à jour, dépendances listées
 - [ ] Pas d'erreurs d'analyse (`flutter analyze`)
 
-## Rapport d'auto-évaluation (utilisez ceci pour la soumission)
+## Rapport d'auto-évaluation (à inclure dans la soumission)
 
-Score attendu: 70/100 (objectif)
+Score visé: 70/100 (objectif de certification). Ci‑dessous la cartographie exacte entre le cahier des charges et l'état actuel du projet :
 
-- Fonctionnalités requises:
-	- 4 écrans distincts: [OK] `Splash`, `Home`, `RecipeList`, `RecipeDetail`, `AddRecipe`
-	- Navigation via `GoRouter`: [OK]
-	- Liste avec recherche/filtrage: [Partial] `search_bar` present; improve filtering logic
-	- Détail avec passage de paramètres: [OK]
-	- Formulaire avec validation: [Partial] form exists — add validators for 3+ fields
-	- Light/Dark theme: [OK]
+- **Écrans** (≥4) — 10 pts: `Splash`, `Home`, `RecipeList`, `RecipeDetail`, `AddRecipe` — **OK**
+- **Navigation (GoRouter / routes nommées)** — 15 pts: routes et passage de paramètres implémentés (`/recipe/:id`) — **OK**
+- **Liste avec recherche / filtrage** — 15 pts: `RecipeListScreen` + `search_bar` + `RecipeProvider` (filtrage basique) — **Partiel** (améliorer debounce et filtrage côté serveur non nécessaire)
+- **Détail avec paramètre** — 10 pts: `RecipeDetailScreen(recipeId: ...)` — **OK**
+- **Formulaire avec validation (≥3 champs)** — 15 pts: `AddRecipeScreen` valide `title`, `description`, `category`, `prepTime`, `cookTime`, `ingredients`, `instructions` — **OK**
+- **Thème light/dark** — 5 pts: `lib/theme/app_theme.dart` — **OK**
+- **Techniques & bonnes pratiques** — 20 pts total:
+  - Utilisation d'au moins 8 widgets différents (ListView, GridView, Card, Image, Text, TextFormField, Chip, Icon...) — **OK**
+  - Au moins 3 widgets réutilisables dans `lib/widgets/` — **OK**
+  - Séparation UI / données (models + provider) — **OK**
+  - Responsive: **Partiel** (grid fixe, améliorer pour tablettes)
 
-- Technique:
-	- Utilise ListView, GridView, Card, etc.: [OK]
-	- 3 widgets réutilisables dans `lib/widgets/`: [OK]
-	- Responsive: [Partial] needs tablet layout verification
-	- UI/data separation: [OK]
+> Statut global provisoire: certains points techniques (filtrage avancé, responsive tablette, persistance) restent à améliorer — voir "Prochaines étapes".
 
-## Captures d'écran (à remplacer)
+## Captures d'écran requises (à ajouter au dépôt)
 
-1. Home screen - `screenshots/home.png`
-2. Recipe list - `screenshots/list.png`
-3. Recipe detail - `screenshots/detail.png`
-4. Add recipe form - `screenshots/add.png`
+1. `screenshots/home.png` — écran d'accueil
+2. `screenshots/list.png` — écran liste / grille
+3. `screenshots/detail.png` — page détail d'une recette
+4. `screenshots/add.png` — formulaire d'ajout (montrant les messages de validation)
 
-Placez les images dans le dossier `screenshots/` et poussez le repo public.
+Placez ces images dans le dossier `screenshots/` et poussez-les sur le repo public avant soumission.
+
+## Vérification manuelle rapide (pour le correcteur)
+
+1. Cloner le dépôt et lancer:
+
+```bash
+flutter pub get
+flutter run
+```
+
+2. Vérifier la navigation:
+   - Démarrer → `Splash` puis `Home`.
+   - Ouvrir `Recipes` et parcourir la grille/list.
+   - Cliquer sur une carte → vérifier que l'URL `/recipe/:id` affiche le bon détail.
+
+3. Vérifier le formulaire `Add New Recipe`:
+   - Cliquer sur `Add New Recipe` → sans remplir, appuyer sur `Add Recipe` → les messages de validation apparaissent.
+   - Remplir correctement et soumettre → la recette est ajoutée à la liste (en mémoire).
+
+4. Lancer les tests et l'analyse statique:
+
+```bash
+flutter analyze
+flutter test
+```
+
+## Checklist finale (à cocher pour soumission)
+
+- [ ] Repo public GitHub (URL fournie dans le formulaire)
+- [ ] `README.md` complet (instructions, vérification, captures)
+- [ ] Tests : `test/widget_test.dart`, `test/add_recipe_form_test.dart` — **inclus**
+- [ ] Formulaire avec validateurs (≥3 champs) — **OK**
+- [ ] Navigation avec paramètres — **OK**
+- [ ] Aucune erreur bloquante à `flutter analyze` (corriger warnings restants)
+
+## Prochaines étapes recommandées (priorisées)
+
+1. Corriger les derniers warnings d'analyse et les avis `prefer_const_constructors` (rapide).
+2. Améliorer le filtrage/recherche (debounce, sensibilité, tri) — augmente l'expérience utilisateur.
+3. Ajouter persistance locale (`shared_preferences` ou `sqflite`) pour sauvegarder les recettes ajoutées (important pour la note finale).
+4. Ajuster le `GridView` pour qu'il soit responsive sur tablettes (`SliverGridDelegateWithMaxCrossAxisExtent` ou `LayoutBuilder`).
 
 ---
 
-Si vous voulez, je peux préparer automatiquement:
-
-- des tests widget supplémentaires pour `RecipeList` et `AddRecipe`.
-- une PR branchée avec persistance `shared_preferences` et validations.
-- captures d'écran automatisées via `flutter drive` (si nécessaire).
-
-Dites-moi quelle option vous préférez et je l'implémente.
+Si vous le souhaitez, je peux commencer par la tâche #1 (corriger les derniers warnings) — voulez-vous que je lance `flutter analyze` maintenant et corrige automatiquement les avertissements faciles ?
